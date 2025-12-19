@@ -1,0 +1,10 @@
+[project]
+name = "ccdevback"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "python-keystoneclient>=5.7.0",
+    "python-swiftclient>=4.9.0",
+]
