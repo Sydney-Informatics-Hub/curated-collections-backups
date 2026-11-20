@@ -1,22 +1,26 @@
 #!/usr/bin/env bash
 
-source /home/ubuntu/ccdevback/.secrets/openstack_creds.sh
+source /srv/backups/.secrets/openstack_creds.sh
 
 printf -v TIMESTAMP "%(%Y%m%d_%H%M%S)T" -1
 
-FOLDER=/home/ubuntu/ccdevback/sql/
-FILE=${FOLDER}/${TIMESTAMP}.sql
+BASEDIR=/srv/backups
 
-CONTAINER=cc-dev-backup
-OBJECT_FOLDER=carceral
+SQL=${BASEDIR}/sql
+TODAY="${BASEDIR}/_days/${TIMESTAMP}"
 
+mkdir -p $TODAY
 
-cp ${FOLDER}/dump.sql $FILE
+CONTAINER=cc-sih-multitenant-backup
 
-/home/ubuntu/.local/bin/uv run \
-                           --project /home/ubuntu/ccdevback/ \
-	swift upload --object-name "${OBJECT_FOLDER}/db_${TIMESTAMP}.sql" \
-	             $CONTAINER \
-	             $FILE
+cp $SQL/*.sql $TODAY/
 
-rm $FILE
+for SQLFILE in $TODAY/*.sql
+do
+	BASEFILE=$(basename $SQLFILE)
+	OBJECT="${TIMESTAMP}/${BASEFILE}"
+	/home/ubuntu/.local/bin/uv run --project /srv/backups/ \
+	    swift upload --object-name $OBJECT $CONTAINER $SQLFILE
+done
+
+# TODO: lea
